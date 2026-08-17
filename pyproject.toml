@@ -1,0 +1,13 @@
+[tool.poetry]
+name = "mobilecam"
+version = "0.1.0"
+description = "Mobile Camera Streamer App"
+authors = ["Developer"]
+
+[tool.flet]
+org = "com.example"
+product = "mobilecam"
+
+[dependencies]
+python = "^3.10"
+flet = "*"
