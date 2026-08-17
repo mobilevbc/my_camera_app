@@ -30,4 +30,4 @@ jobs:
 
       - name: Build Android APK
         run: |
-          flet build apk --no-interactive
+          yes | flet build apk
