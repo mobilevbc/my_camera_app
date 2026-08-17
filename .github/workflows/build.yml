@@ -31,3 +31,9 @@ jobs:
       - name: Build Android APK
         run: |
           yes | flet build apk
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MobileCameraApp-Flet
+          path: build/**/*.apk
