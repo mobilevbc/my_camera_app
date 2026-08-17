@@ -5,7 +5,7 @@ from socketserver import ThreadingMixIn
 import threading
 
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
-    """ഒരേ സമയം തടസ്സമില്ലാതെ സ്ട്രീം ചെയ്യാനുള്ള സെർവർ"""
+    """ഒരേ സമയം സ്ട്രീം ചെയ്യാനുള്ള സെർവർ"""
 
 class StreamHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -14,21 +14,28 @@ class StreamHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html; charset=utf-8')
             self.end_headers()
             
+            # HTML5 Camera Streaming Page
             html_content = """
             <!DOCTYPE html>
             <html>
             <head>
-                <title>Mobile Cam Stream</title>
+                <title>Mobile Camera Stream</title>
                 <meta name="viewport" content="width=device-width, initial-scale=1">
                 <style>
                     body { margin: 0; background-color: #121212; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
-                    video { width: 90%; max-width: 600px; border-radius: 10px; border: 2px solid #4CAF50; }
-                    h2 { color: #4CAF50; }
+                    video { width: 90%; max-width: 600px; border-radius: 10px; border: 2px solid #2196F3; }
+                    h2 { color: #2196F3; }
                 </style>
             </head>
             <body>
                 <h2>Mobile Camera Live Stream</h2>
-                <p>കണക്ഷൻ വിജയിച്ചിരിക്കുന്നു!</p>
+                <video id="video" autoplay playsinline></video>
+                <script>
+                    const video = document.getElementById('video');
+                    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+                        .then(stream => { video.srcObject = stream; })
+                        .catch(err => { console.error("Camera access error:", err); });
+                </script>
             </body>
             </html>
             """
