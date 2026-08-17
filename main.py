@@ -1,29 +1,48 @@
 import flet as ft
 import socket
+import cv2
 from http.server import HTTPServer, BaseHTTPRequestHandler
+from socketserver import ThreadingMixIn
 import threading
+
+camera = None
+
+def get_camera():
+    global camera
+    if camera is None or not camera.isOpened():
+        camera = cv2.VideoCapture(0)
+    return camera
+
+class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+    """ഒരേ സമയം തടസ്സമില്ലാതെ സ്ട്രീം ചെയ്യാനുള്ള സെർവർ"""
 
 class StreamHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == '/video_feed':
             self.send_response(200)
-            self.send_header('Content-type', 'text/html')
+            self.send_header('Content-type', 'multipart/x-mixed-replace; boundary=frame')
             self.end_headers()
-            html_content = """
-            <html>
-                <head><title>Mobile Camera Stream</title></head>
-                <body style="margin:0; background-color:#121212; display:flex; justify-content:center; align-items:center; height:100vh;">
-                    <h2 style="color:white; font-family:sans-serif;">Mobile Camera Active Stream</h2>
-                </body>
-            </html>
-            """
-            self.wfile.write(html_content.encode('utf-8'))
+            
+            cam = get_camera()
+            while True:
+                success, frame = cam.read()
+                if not success:
+                    break
+                else:
+                    ret, buffer = cv2.imencode('.jpg', frame)
+                    frame_bytes = buffer.tobytes()
+                    self.wfile.write(b'--frame\r\n')
+                    self.send_header('Content-Type', 'image/jpeg')
+                    self.send_header('Content-Length', str(len(frame_bytes)))
+                    self.end_headers()
+                    self.wfile.write(frame_bytes)
+                    self.wfile.write(b'\r\n')
         else:
             self.send_response(404)
             self.end_headers()
 
 def start_http_server():
-    server = HTTPServer(('0.0.0.0', 8080), StreamHandler)
+    server = ThreadedHTTPServer(('0.0.0.0', 8080), StreamHandler)
     server.serve_forever()
 
 def get_local_ip():
