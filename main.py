@@ -60,7 +60,7 @@ def main(page: ft.Page):
                 padding=20,
                 content=ft.Column([
                     ft.Text("ലാപ്‌ടോപ്പ് ബ്രൗസറിൽ നൽകേണ്ട ലിങ്ക്:", size=14, color=ft.Colors.GREY_300),
-                    ft.SelectableText(stream_url, size=18, weight=ft.FontWeight.BOLD, color=ft.Colors.GREEN_400),
+                    ft.Text(stream_url, size=18, weight=ft.FontWeight.BOLD, color=ft.Colors.GREEN_400, selectable=True),
                 ], horizontal_alignment=ft.CrossAxisAlignment.CENTER)
             )
         )
