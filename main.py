@@ -1,17 +1,8 @@
 import flet as ft
 import socket
-import cv2
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from socketserver import ThreadingMixIn
 import threading
-
-camera = None
-
-def get_camera():
-    global camera
-    if camera is None or not camera.isOpened():
-        camera = cv2.VideoCapture(0)
-    return camera
 
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     """ഒരേ സമയം തടസ്സമില്ലാതെ സ്ട്രീം ചെയ്യാനുള്ള സെർവർ"""
@@ -20,23 +11,28 @@ class StreamHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == '/video_feed':
             self.send_response(200)
-            self.send_header('Content-type', 'multipart/x-mixed-replace; boundary=frame')
+            self.send_header('Content-type', 'text/html; charset=utf-8')
             self.end_headers()
             
-            cam = get_camera()
-            while True:
-                success, frame = cam.read()
-                if not success:
-                    break
-                else:
-                    ret, buffer = cv2.imencode('.jpg', frame)
-                    frame_bytes = buffer.tobytes()
-                    self.wfile.write(b'--frame\r\n')
-                    self.send_header('Content-Type', 'image/jpeg')
-                    self.send_header('Content-Length', str(len(frame_bytes)))
-                    self.end_headers()
-                    self.wfile.write(frame_bytes)
-                    self.wfile.write(b'\r\n')
+            html_content = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Mobile Cam Stream</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <style>
+                    body { margin: 0; background-color: #121212; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+                    video { width: 90%; max-width: 600px; border-radius: 10px; border: 2px solid #4CAF50; }
+                    h2 { color: #4CAF50; }
+                </style>
+            </head>
+            <body>
+                <h2>Mobile Camera Live Stream</h2>
+                <p>കണക്ഷൻ വിജയിച്ചിരിക്കുന്നു!</p>
+            </body>
+            </html>
+            """
+            self.wfile.write(html_content.encode('utf-8'))
         else:
             self.send_response(404)
             self.end_headers()
